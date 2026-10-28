@@ -52,4 +52,24 @@ describe("/contributions behaviour", () => {
 
     cy.url().should("include", "contributions");
   });
+
+  it("Should reject expressions instead of evaluating them", () => {
+    cy.userSignIn();
+    cy.visitPage("/contributions");
+    cy.get("table")
+      .find("input")
+      .first()
+      .clear()
+      .type("1+1");
+
+    cy.get("button[type='submit']")
+      .click();
+
+    cy.get(".alert-danger")
+      .should("be.visible")
+      .contains("Invalid contribution percentages");
+
+    cy.get(".alert-success")
+      .should("not.exist");
+  });
 });

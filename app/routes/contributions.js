@@ -27,18 +27,14 @@ function ContributionsHandler(db) {
 
     this.handleContributionsUpdate = (req, res, next) => {
 
-        /*jslint evil: true */
-        // Insecure use of eval() to parse inputs
-        const preTax = eval(req.body.preTax);
-        const afterTax = eval(req.body.afterTax);
-        const roth = eval(req.body.roth);
+        // Fix for A1 SSJS Injection: never evaluate user input as code.
+        // Only non-negative whole numbers are accepted; anything else becomes
+        // NaN and is rejected by the validation below.
+        const parseStrict = value => (typeof value === "string" && /^\d+$/.test(value.trim())) ? parseInt(value, 10) : NaN;
+        const preTax = parseStrict(req.body.preTax);
+        const afterTax = parseStrict(req.body.afterTax);
+        const roth = parseStrict(req.body.roth);
 
-        /*
-        //Fix for A1 -1 SSJS Injection attacks - uses alternate method to eval
-        const preTax = parseInt(req.body.preTax);
-        const afterTax = parseInt(req.body.afterTax);
-        const roth = parseInt(req.body.roth);
-        */
         const {
             userId
         } = req.session;
